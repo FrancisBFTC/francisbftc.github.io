@@ -223,7 +223,7 @@ function runSnakeRun(){
 			// porém mais algumas análises em relação a isso serão feitas
 			const foundX = snake.find(value => value.x === food.x);
 			const foundY = snake.find(value => value.y === food.y);
-			if(foundX === undefined && foundY === undefined){
+			if(foundX !== undefined && foundY !== undefined){
 				food.x += box;
 				food.y += box;
 				if(food.x > 15 * box)
