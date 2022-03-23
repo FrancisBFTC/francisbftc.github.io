@@ -18,6 +18,23 @@ let divLevel = "";
 */
 // ------------------------------------------
 
+let countPoint = 0;
+let colorFood  = "red";
+let challenge = [];
+
+challenge[0] = {
+	ammount: 0
+};
+
+challenge[1] = {
+	ammount: 0
+};
+
+challengeBlue = false;
+counterBlue = 0;
+counterYellow = 0;
+snakeColor = "green";
+
 let direction  = "right";
 let previousDirection = "";  
 let box = 32;
@@ -69,14 +86,14 @@ function createBG(){
 // Função que cria a cobrinha do jogo
 function createSnake(){
 	for(let i = 0; i < snake.length; i++){
-		context.fillStyle = "green";
+		context.fillStyle = snakeColor;
 		context.fillRect(snake[i].x, snake[i].y, box, box);
 	}
 }
 
 // Função que cria a comida da cobrinha do jogo
 function createFood(){
-	context.fillStyle = "red";
+	context.fillStyle = colorFood;
 	context.fillRect(food.x, food.y, box, box);
 }
 
@@ -129,11 +146,25 @@ function startGame(){
 		da cobra, a cobrinha será zerada ou redesenhada no início ou final da tela
 	*/
 	switch(direction){
-		case "right" : snake[0].x = (snake[0].x > 15 * box) ? 0 : snake[0].x; break;
-		case "left" : snake[0].x = (snake[0].x < 0)  ? 15 * box : snake[0].x; break;
-		case "up" : snake[0].y = (snake[0].y > 15 * box) ? 0 : snake[0].y;    break;
-		case "down" : snake[0].y = (snake[0].y < 0)  ? 15 * box : snake[0].y; break;
+		case "right" :
+			if(snake[0].x > (15 * box)) challengeBlue = true;
+			snake[0].x = (snake[0].x > 15 * box) ? 0 : snake[0].x; 
+			break;
+		case "left" : 
+			if(snake[0].x < 0) challengeBlue = true;
+			snake[0].x = (snake[0].x < 0)  ? 15 * box : snake[0].x;
+			break;
+		case "up" : 
+			if(snake[0].y > (15 * box)) challengeBlue = true;
+			snake[0].y = (snake[0].y > 15 * box) ? 0 : snake[0].y;
+			break;
+		case "down" : 
+			if(snake[0].y < 0) challengeBlue = true;
+			snake[0].y = (snake[0].y < 0)  ? 15 * box : snake[0].y;
+			break;
 	}
+
+
 
 	// Cessa a execução da música de fundo do menu
 	clearInterval(sound);
@@ -165,8 +196,29 @@ function startGame(){
 			createMenu('Play Again');
 
 		}
+		
+	}
+
+	// New Challenges
+	if(snake.length > 10){
+		if(snake[0].x === snake[10].x-box && snake[0].y === snake[10].y){
+			challenge[0].ammount++;
+		}
+	}
+
+	if(snake.length > 14){
+		if(challenge[1].ammount === 0){
+			if(challengeBlue){
+				let endSnake = snake.length-1;
+				if(snake[0].x === snake[endSnake].x-box && snake[0].y === snake[endSnake].y){
+					challenge[1].ammount++;
+					challengeBlue = false;
+				}
+			}
+		}
 	}
 	
+
 	// Recria o fundo, a cobra e a comida dentro desse loop
 	createBG();
 	createSnake();
@@ -210,7 +262,7 @@ function runSnakeRun(){
 			e aumenta a pontuação escrevendo no campo de texto, se não, 
 			apaga a cauda da cobra, isso faz parte dela correr também.
 		*/
-		if(snakeX !== food.x || snakeY !== food.y){
+		if(snake[0].x !== food.x || snake[0].y !== food.y){
 			snake.pop();
 		}
 		else{
@@ -221,18 +273,57 @@ function runSnakeRun(){
 			// Código adicionado para corrigir um bug, pois a comida de vez
 			// em quando aparece em cima do corpo da cobra, então isso pode resolver
 			// porém mais algumas análises em relação a isso serão feitas
-			const foundX = snake.find(value => value.x === food.x);
-			const foundY = snake.find(value => value.y === food.y);
+			let foundX = snake.find(value => value.x === food.x);
+			let foundY = snake.find(value => value.y === food.y);
 			if(foundX !== undefined && foundY !== undefined){
-				food.x += box;
-				food.y += box;
-				if(food.x > 15 * box)
-					food.x -= (box * 2);
-				if(food.y > 15 * box)
-					food.y -= (box * 2);
+				food.x = Math.floor(Math.random() * 15 + 1) * box;
+				food.y = Math.floor(Math.random() * 15 + 1) * box;
 			}
 
-			pontuacao++;
+
+			// Implementação de comida amarela a cada 7 pontos
+			// Se a 1ª manobra for satisfeita
+			if(colorFood === "yellow"){
+				pontuacao += 5;
+				colorFood = "red";
+				counterYellow++;
+				if(counterYellow === 10){
+					snakeColor = "yellow";
+					counterYellow = 0;
+				}
+			}else if(colorFood === "lightblue"){
+				pontuacao += 10;
+				colorFood = "red";
+				counterBlue++;
+				if(counterBlue === 5){
+					snakeColor = "lightblue";
+					counterBlue = 0;
+				}
+			}else{
+				pontuacao++;
+			}
+
+			if(countPoint === 7){
+				colorFood = "yellow";
+				countPoint = -1;
+			}
+
+			if(challenge[0].ammount > 0){
+				countPoint++;
+				if(countPoint === 5){
+					colorFood = "yellow";
+					countPoint = -1;
+					challenge[0].ammount--;
+				}
+			}
+
+			if(challenge[1].ammount > 0){
+				colorFood = "lightblue";
+				challenge[1].ammount = 0;
+			}
+
+
+
 			counter++;
 			input.value = pontuacao;
 			
