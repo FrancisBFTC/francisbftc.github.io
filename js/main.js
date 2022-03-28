@@ -11,6 +11,7 @@ function setColorSelected(theClass){
 var jogos2d_list = [
     'snakegame',
     'oresgate',
+    'jogodavelha'
 ];
 
 var jogos2d = document.getElementById('jogos_2d');
