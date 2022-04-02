@@ -11,3 +11,20 @@
 	position: absolute;
 	bottom: 0;
 }
+
+/* Classe do Cactus */
+.div-cactus{
+	position: absolute;
+	width: 60px;
+	height: 60px;
+	bottom: 0;
+	background: url(../../img/cactus.png);
+}
+
+.div-bird{
+	position: absolute;
+	width: 44px;
+	height: 28px;
+	bottom: 50;
+	background: url(../../img/bird-wind-up.png);
+}
