@@ -1,0 +1,1 @@
+// Scripts para o jogo do dinossauro
