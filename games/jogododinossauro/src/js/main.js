@@ -8,6 +8,9 @@ const background = document.querySelector('.div-background');
 let isJumping = false;
 let score = 0;
 let birdWind = false;
+let position = 0;
+let counter = 0;
+let speed = 20;
 
 let imgsCactus = [
 	'img/cactus.png',
@@ -35,7 +38,6 @@ document.addEventListener('keydown', identKeyUp);
 
 // Função de salto do dinossauro
 function jumpDino(){
-	let position = 0;
 	isJumping = true;
 
 	// dinossauro subindo
@@ -47,15 +49,15 @@ function jumpDino(){
 			let downInterval = setInterval(() => {
 				if(position <= 0){
 					clearInterval(downInterval);
-					isJumping = false
+					isJumping = false;
 				}else{
-					position -= 20;
+					position -= 25;
 					dino.style.bottom = `${position}px`;
 				}
 			}, 20);
 
 		}else{
-			position += 20;
+			position += 25;
 			dino.style.bottom = `${position}px`;
 		}
 	}, 20);
@@ -74,19 +76,28 @@ function createCactus(){
 	cactus.style.backgroundImage = `url(${imgsCactus[indexCactus]})`;
 	background.appendChild(cactus);
 
-	score++;
 
 	let leftInterval = setInterval(() => {
+		counter++;
+		score++;
 		if(cactusPos < -60){
 			clearInterval(leftInterval);
 			background.removeChild(cactus);
-		}else{
+		}else if(cactusPos > 0 && cactusPos < 60 && position < 60){
+			// Game Over
+			clearInterval(leftInterval);
+			document.body.innerHTML = '<h1 class="game-over"> FIM DE JOGO</h1>';
+		}else {
 			cactusPos -= 10;
 			cactus.style.left = `${cactusPos}px`;
 		}
 
-	}, 20);
+	}, speed);
 
+	if(counter > 20){
+		speed--;
+		counter = 0;
+	}
 
 	setTimeout(createCactus, ramdomTime);
 }
@@ -111,12 +122,16 @@ function createBird(){
 			clearInterval(leftIntervalB);
 			clearInterval(birdWinds);
 			background.removeChild(bird);
-		}else{
+		}else if(birdPosX > 0 && birdPosX <= 60 && position == birdPosY){
+			// Game Over
+			clearInterval(leftIntervalB);
+			document.body.innerHTML = '<h1 class="game-over"> FIM DE JOGO</h1>';
+		}else {
 			birdPosX -= 10;
 			bird.style.left = `${birdPosX}px`;
 			
 		}
-	}, 20);
+	}, speed+20);
 
 	let birdWinds = setInterval(() => {
 		if(!birdWind){
@@ -138,6 +153,8 @@ function createBird(){
 /* Chamada das funções principais do jogo */
 // -------------------------------------------------
 createCactus();
+
 createBird();
+
 // -------------------------------------------------
 
