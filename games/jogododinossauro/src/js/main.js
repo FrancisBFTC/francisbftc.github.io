@@ -1,9 +1,10 @@
 // Scripts para o jogo do dinossauro
 
-/* Constantes do D.O.M */
+/* Constantes do D.O.M e Variáveis Globais */
 // -------------------------------------------------
 
 const dino = document.querySelector('.div-dino');
+let isJumping = false;
 
 // -------------------------------------------------
 
@@ -12,7 +13,7 @@ const dino = document.querySelector('.div-dino');
 
 let identKeyUp = (event) => {
 	if(event.keyCode === 32)
-		jumpDino();
+		if(!isJumping) jumpDino();
 }
 
 document.addEventListener('keyup', identKeyUp);
@@ -25,7 +26,8 @@ document.addEventListener('keyup', identKeyUp);
 
 function jumpDino(){
 	let position = 0;
-	
+	isJumping = true;
+
 	// dinossauro subindo
 	let upInterval = setInterval(() => {
 		if(position >= 150){
@@ -35,6 +37,7 @@ function jumpDino(){
 			let downInterval = setInterval(() => {
 				if(position <= 0){
 					clearInterval(downInterval);
+					isJumping = false
 				}else{
 					position -= 20;
 					dino.style.bottom = `${position}px`;
