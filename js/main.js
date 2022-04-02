@@ -12,7 +12,8 @@ var jogos2d_list = [
     'snakegame',
     'oresgate',
     'jogodavelha',
-    'thegenius'
+    'thegenius',
+    'spaceshooter'
 ];
 
 var jogos2d = document.getElementById('jogos_2d');
