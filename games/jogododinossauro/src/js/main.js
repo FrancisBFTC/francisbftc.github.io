@@ -152,8 +152,8 @@ function createBird(){
 
 /* Chamada das funções principais do jogo */
 // -------------------------------------------------
-createCactus();
 
+createCactus();
 createBird();
 
 // -------------------------------------------------
