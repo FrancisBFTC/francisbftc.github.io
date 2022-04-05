@@ -11,6 +11,7 @@ const RIGHT = 2;
 const LEFT  = 3;
 
 var kmValue, abatidos, missionNum, yearValue, imgObj;
+var introMusic, musicMission, musicFinish;
 
 let alienInterval, initMission;
 
@@ -269,6 +270,10 @@ startButton.addEventListener('click', (event) => {
 
 function playGame() {
     if(pressJ === false){
+        clearInterval(loadMusic);
+        introMusic.pause();
+        musicMission.play();
+
         startButton.style.display = 'none';
         instructionsText.style.display = 'none';
         description.style.display = 'none';
@@ -305,7 +310,6 @@ function gameOver() {
 
 // Função que processa a primeira missão do jogo
 function firstMission(){
-        
         yearValue = document.getElementById('year-light');
         abatidos = document.getElementById('abatidos');
         missionNum = document.getElementById('the-mission');
@@ -322,6 +326,9 @@ function firstMission(){
             }
         }else{
             if(alienDead >= 5){
+                musicMission.pause();
+                musicFinish.play();
+
                 yearValue.style.color = 'lightblue';
                 years = 0;
 
@@ -470,6 +477,8 @@ function flyIntoPlanet(){
                 playArea.classList.add('back-default');
                 pressJ = false;
                 clearInterval(traveling);
+                musicFinish.pause();
+                introMusic.play();
             }
 
         }, 125);
@@ -477,6 +486,22 @@ function flyIntoPlanet(){
         imgObj.classList.add('img-planet-effect');
 
     }else{
-        alert('Você não está na coordenada do planeta Axius!\n Voe até o planeta com W,A,S ou D');
+        alert('Você não está na coordenada do planeta Axius!\nVoe até o planeta com W, A, S ou D');
     }
 }
+
+
+let initMusic = () => {
+    introMusic = document.getElementById('intro-music-menu');
+    musicMission = document.getElementById('music-mission');
+    musicFinish = document.getElementById('music-mission-finish');
+
+    introMusic.addEventListener("ended", function(){ 
+        introMusic.currentTime = 0; 
+        introMusic.play(); 
+    }, false);
+
+    introMusic.play();
+}
+
+let loadMusic = setInterval(initMusic, 20);
