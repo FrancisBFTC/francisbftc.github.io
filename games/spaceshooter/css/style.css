@@ -43,8 +43,6 @@ body {
 .img-planet-axius{
 	width: 500px;
 	height: 500px;
-	left: 150;
-	top: 70px;
 }
 
 .img-planet-effect{
@@ -53,12 +51,28 @@ body {
 	transform: scale(20.1);
 }
 
+.img-mother-ship{
+	width: 400px;
+	height: 220px;
+	position: absolute;
+	left: 60%;
+	top: 55%;
+	-webkit-transform: rotate(345deg);
+	-ms-transform: rotate(345deg);
+	transform: rotate(345deg);
+}
+
 .back-default{
 	background-image: url(../img/background1.jpg);
 }
 
 .back-animate{
 	background-image: url(../img/background5.jpg);
+}
+
+.back-animate2{
+	background-image: url(../img/backmission2.jpg);
+	background-size: cover;
 }
 
 .flying-down{
