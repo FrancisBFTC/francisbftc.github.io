@@ -26,6 +26,7 @@ let indexDir  = 0;
 let life = 100;
 let gameOverString;
 let personDirection = "right";
+let directionUp = "";
 
 const direction = [
     'flying-down',
@@ -49,19 +50,19 @@ const horrorAliens = [
 
 let missions = {
     step1 : {
-        msg: '1ª missão: Elimine os 100 alienígenas até 200 Anos-luz ' 
+        msg: '1ª missão: Elimine os 10 alienígenas até 50 Anos-luz ' 
           + 'ao norte do espaço e encontre o planeta Axius!',
         running: false,
         year: 0
     },
     step2 : {
-        msg: '2ª missão: Elimine os 300 alienígenas voando até 500km e ' 
+        msg: '2ª missão: Elimine os 20 alienígenas voando até 100km e ' 
           + 'encontre a nave mãe de Axius!',
         running: false,
         km: 0
     },
     step3 : {
-        msg: '3ª missão: Extermine os 500 aliens monstruosos para liberar entrada ' 
+        msg: '3ª missão: Extermine os 50 aliens monstruosos para liberar entrada ' 
           + 'na nave mãe!',
         running: false
     },
@@ -79,6 +80,7 @@ function flyShip(event) {
             changeDirectionSpace(UP);
         else if(missions.mission >= 3){
             yourShip.src = 'img/shooter/player_' + personDirection + '_up.png';
+            directionUp = "up";
         }
                
     } else if(event.key === 'ArrowDown') {
@@ -90,6 +92,7 @@ function flyShip(event) {
          else if(missions.mission >= 3){
             personDirection = "right";
             yourShip.src = 'img/shooter/player_' + personDirection + '.png';
+            directionUp = "";
         }
     } else if(event.key === 'ArrowLeft'){
         if(missions.step2.running) 
@@ -97,6 +100,7 @@ function flyShip(event) {
         else if(missions.mission >= 3){
             personDirection = "left";
             yourShip.src = 'img/shooter/player_' + personDirection + '.png';
+            directionUp = "";
         }
     }else if(event.key === 'w'){
             if(missions.mission < 3) 
@@ -119,6 +123,7 @@ function flyShip(event) {
 
     }else if(event.keyCode === 17){
         yourShip.src = 'img/shooter/player_' + personDirection + '_diag.png';
+        directionUp = "diag";
     }
 }
 
@@ -218,9 +223,33 @@ function moveLaser(laser) {
         })
 
         if(missions.step1.running){
-            (yPosition < 0) ? laser.remove() : laser.style.top = `${yPosition - 8}px`;
+            (yPosition < 60) ? laser.remove() : laser.style.top = `${yPosition - 8}px`;
         }else{
-            (xPosition > sizeAreaX+300) ? laser.remove() : laser.style.left = `${xPosition + 8}px`;
+            if(missions.mission >= 3){
+                if(personDirection === "right" && directionUp === ""){
+                    (xPosition > sizeAreaX+140) ? laser.remove() : laser.style.left = `${xPosition + 8}px`;
+                }else if(personDirection === "left" && directionUp === ""){
+                    (xPosition < 140) ? laser.remove() : laser.style.left = `${xPosition - 8}px`;
+                }else if((personDirection === "right" || personDirection === "left") && directionUp === "up"){
+                     (yPosition < 60) ? laser.remove() : laser.style.top = `${yPosition - 8}px`;
+                }else if(personDirection === "right" && directionUp === "diag"){
+                     if(yPosition < 60 && xPosition > sizeAreaX+140){
+                        laser.remove();
+                     }else{
+                        laser.style.top = `${yPosition - 8}px`;
+                        laser.style.left = `${xPosition + 8}px`;
+                     } 
+                }else if(personDirection === "left" && directionUp === "diag"){
+                     if(yPosition < 60 && xPosition < 140){
+                        laser.remove();
+                     }else{
+                        laser.style.top = `${yPosition - 8}px`;
+                        laser.style.left = `${xPosition - 8}px`;
+                     } 
+                }
+            }else{
+                (xPosition > sizeAreaX+140) ? laser.remove() : laser.style.left = `${xPosition + 8}px`;
+            }
         }
 
         abatidos.innerText = alienDead;
@@ -429,7 +458,7 @@ function firstMission(){
         yearValue = document.getElementById('year-light');
         abatidos = document.getElementById('abatidos');
         missionNum = document.getElementById('the-mission');
-        if(missions.step1.year < 1){      
+        if(missions.step1.year < 50){      
 
             if(indexDir === 0){
                 missions.step1.year++;
@@ -440,7 +469,7 @@ function firstMission(){
                 yearValue.style.color = 'red';
             }
         }else{
-            if(alienDead >= 1){
+            if(alienDead >= 10){
                 musicMission.pause();
                 musicFinish.play();
 
@@ -475,7 +504,7 @@ function secondMission() {
     kmValue = document.getElementById('km-value');
     abatidos = document.getElementById('abatidos');
     missionNum = document.getElementById('the-mission');
-        if(missions.step2.km < 1){      
+        if(missions.step2.km < 100){      
 
             if(indexDir === 2){
                 missions.step2.km++;
@@ -486,7 +515,7 @@ function secondMission() {
                 kmValue.style.color = 'red';
             }
         }else{
-            if(alienDead >= 1){
+            if(alienDead >= 20){
                 musicMission.pause();
                 musicFinish.play();
 
@@ -528,7 +557,7 @@ function thirdMission(){
     abatidos = document.getElementById('abatidos');
     lifeLevel = document.getElementById('life');
 
-    if(alienDead >= 1){
+    if(alienDead >= 50){
         musicMission.pause();
         musicFinish.play();
 
@@ -667,7 +696,9 @@ function walkToMotherShip(){
         playArea.classList.add('back-default');
         pressJ = false;
         musicFinish.pause();
-        introMusic.play();        
+        introMusic.play();
+        alert('A nova missão será implementada em breve!\nJuntamente com outros movimentos do personagem... :)');
+        location.reload();       
     }else{
         alert('Você não está próximo a nave!\nCaminhe até a nave digitando D');
     }
