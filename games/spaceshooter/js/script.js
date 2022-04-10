@@ -13,6 +13,8 @@ const LEFT  = 3;
 var kmValue, abatidos, missionNum, yearValue, imgObj;
 var introMusic, musicMission, musicFinish;
 
+var lifeLevel = "";
+
 let alienInterval, initMission;
 
 let pressJ    = false;
@@ -27,6 +29,8 @@ let life = 100;
 let gameOverString;
 let personDirection = "right";
 let directionUp = "";
+let counterRun = 0;
+let canRunCounter = 0;
 
 const direction = [
     'flying-down',
@@ -110,8 +114,12 @@ function flyShip(event) {
                 moveDown();
     }else if(event.key === 'a'){
         moveLeft();
+        walkPerson();
+        directionUp = "";
     }else if(event.key === 'd'){
         moveRight();
+        walkPerson();
+        directionUp = "";
     }else if(event.key === " ") {
         fireLaser();
     }else if(event.key === 'j'){
@@ -122,8 +130,35 @@ function flyShip(event) {
                     walkToMotherShip();
 
     }else if(event.keyCode === 17){
-        yourShip.src = 'img/shooter/player_' + personDirection + '_diag.png';
-        directionUp = "diag";
+        if(missions.mission >= 3){
+            yourShip.src = 'img/shooter/player_' + personDirection + '_diag.png';
+            directionUp = "diag";
+        }
+    }
+}
+
+function repositionPerson(event){
+    if(event.key === 'a' || event.key === 'd'){
+        yourShip.src = 'img/shooter/player_' + personDirection + '.png';
+        counterRun = 0;
+    }
+}
+
+// Função para fazer correr o personagem
+function walkPerson(){
+    if(missions.mission >= 3){
+        canRunCounter++;
+        if(canRunCounter === 3){
+            if(personDirection === 'right'){
+                counterRun--;
+                counterRun = (counterRun < 1) ? 7 : counterRun;
+            } else{
+                counterRun++;
+                counterRun = (counterRun > 7) ? 1 : counterRun;
+            }
+            yourShip.src = 'img/shooter/player_run_' + personDirection + counterRun + '.png';
+            canRunCounter = 0;
+        }
     }
 }
 
@@ -186,25 +221,44 @@ function changeDirectionSpace(index){
     playArea.classList.add(direction[indexDir]);
 }
 
-//funcionalidade de tiro
+//funcionalidade de tiro que cria o laser e o movimenta
 function fireLaser() {
     let laser = createLaserElement();
     playArea.appendChild(laser);
-    moveLaser(laser);
+    moveLaser(laser, personDirection, directionUp);
 }
 
+// Função que gera novos lasers
 function createLaserElement() {
     let xPosition = parseInt(getComputedStyle(yourShip).getPropertyValue('left'));
     let yPosition = parseInt(getComputedStyle(yourShip).getPropertyValue('top'));
     let newLaser = document.createElement('img');
     newLaser.src = 'img/shoot.png';
     newLaser.classList.add('laser');
-    newLaser.style.left = `${xPosition}px`;
-    newLaser.style.top = `${yPosition - 10}px`;
+    if(missions.mission >= 3){
+        readjustmentLaser(newLaser, xPosition, yPosition);
+    }else{
+        newLaser.style.left = `${xPosition}px`;
+        newLaser.style.top = `${yPosition - 10}px`;
+    }
     return newLaser;
 }
 
-function moveLaser(laser) {
+// Reajuste de posição de laser para várias posições do personagem
+function readjustmentLaser(newLaser, xPosition, yPosition){
+    if(directionUp === ''){
+       newLaser.style.left = (personDirection === 'left') ? `${xPosition - 30}px` : `${xPosition + 150}px`;
+       newLaser.style.top = `${yPosition - 20}px`;
+    }else if(directionUp === 'up'){
+       newLaser.style.left = (personDirection === 'left') ? `${xPosition + 100}px` : `${xPosition}px`;
+       newLaser.style.top = `${yPosition - 30}px`;
+    }else{
+       newLaser.style.left = (personDirection === 'left') ? `${xPosition - 20}px` : `${xPosition + 90}px`;
+       newLaser.style.top = `${yPosition - 40}px`;
+    }
+}
+
+function moveLaser(laser, personDir, dirUp) {
     let laserInterval = setInterval(() => {
         let xPosition = parseInt(laser.style.left);
         let yPosition = parseInt(laser.style.top);
@@ -218,43 +272,49 @@ function moveLaser(laser) {
                 alien.classList.remove('alien');
                 alien.classList.add('dead-alien');
                 alienDead++;
-                clearInterval(laserInterval);
+                removeLaser(laser, laserInterval);
             }
         })
 
         if(missions.step1.running){
-            (yPosition < 60) ? laser.remove() : laser.style.top = `${yPosition - 8}px`;
+            (yPosition < 60) ? removeLaser(laser, laserInterval) : laser.style.top = `${yPosition - 8}px`;
         }else{
             if(missions.mission >= 3){
-                if(personDirection === "right" && directionUp === ""){
-                    (xPosition > sizeAreaX+140) ? laser.remove() : laser.style.left = `${xPosition + 8}px`;
-                }else if(personDirection === "left" && directionUp === ""){
-                    (xPosition < 140) ? laser.remove() : laser.style.left = `${xPosition - 8}px`;
-                }else if((personDirection === "right" || personDirection === "left") && directionUp === "up"){
-                     (yPosition < 60) ? laser.remove() : laser.style.top = `${yPosition - 8}px`;
-                }else if(personDirection === "right" && directionUp === "diag"){
+                if(personDir === "right" && dirUp === ""){
+                    (xPosition > sizeAreaX+140) ? removeLaser(laser, laserInterval) : laser.style.left = `${xPosition + 8}px`;
+                }else if(personDir === "left" && dirUp === ""){
+                    (xPosition < 140) ? removeLaser(laser, laserInterval) : laser.style.left = `${xPosition - 8}px`;
+                }else if((personDir === "right" || personDir === "left") && dirUp === "up"){
+                     (yPosition < 60) ? removeLaser(laser, laserInterval) : laser.style.top = `${yPosition - 8}px`;
+                }else if(personDir === "right" && dirUp === "diag"){
                      if(yPosition < 60 && xPosition > sizeAreaX+140){
-                        laser.remove();
+                        removeLaser(laser, laserInterval);
                      }else{
                         laser.style.top = `${yPosition - 8}px`;
                         laser.style.left = `${xPosition + 8}px`;
                      } 
-                }else if(personDirection === "left" && directionUp === "diag"){
+                }else if(personDir === "left" && dirUp === "diag"){
                      if(yPosition < 60 && xPosition < 140){
-                        laser.remove();
+                        removeLaser(laser, laserInterval);
                      }else{
                         laser.style.top = `${yPosition - 8}px`;
                         laser.style.left = `${xPosition - 8}px`;
                      } 
                 }
             }else{
-                (xPosition > sizeAreaX+140) ? laser.remove() : laser.style.left = `${xPosition + 8}px`;
+                (xPosition > sizeAreaX+140) ? removeLaser(laser, laserInterval) : laser.style.left = `${xPosition + 8}px`;
             }
         }
 
         abatidos.innerText = alienDead;
 
-    }, 10);
+    }, 5);
+}
+
+// Função para remover Laser e limpar intervalos
+function removeLaser(laser, laserInterval){
+    laser.remove();
+    clearInterval(laserInterval);
 }
 
 //função para criar inimigos aleatórios
@@ -298,11 +358,11 @@ function moveAlien(alien, indexImg) {
             let sizeAreaY = parseInt(playArea.getBoundingClientRect().height) - 20;
             if(yPosition >= sizeAreaY) {
                 if(Array.from(alien.classList).includes('dead-alien')) {
-                    playArea.removeChild(alien); //alien.remove();
+                    alien.remove();
                     clearInterval(moveAlienInterval);
                 } else {
                     aliensPassed++;
-                    playArea.removeChild(alien); //alien.remove();
+                    alien.remove();
                     clearInterval(moveAlienInterval);
                     if(aliensPassed === 10)
                         gameOver('' + aliensPassed + ' aliens passaram a fronteira...\nMissão falhada!');
@@ -316,11 +376,11 @@ function moveAlien(alien, indexImg) {
 
                 if(xPosition <= 140) {
                     if(Array.from(alien.classList).includes('dead-alien')) {
-                        playArea.removeChild(alien); //alien.remove();
+                        alien.remove(); //alien.remove();
                         clearInterval(moveAlienInterval);
                     } else {
                         aliensPassed++;
-                        playArea.removeChild(alien); //alien.remove();
+                        alien.remove(); //alien.remove();
                         clearInterval(moveAlienInterval);
                         if(aliensPassed === 10)
                             gameOver('' + aliensPassed + ' aliens passaram a fronteira...\nMissão falhada!');
@@ -334,7 +394,13 @@ function moveAlien(alien, indexImg) {
                 let heroX = parseInt(window.getComputedStyle(yourShip).getPropertyValue('left'));
                 let heroY = parseInt(window.getComputedStyle(yourShip).getPropertyValue('top'));
 
-                if(indexImg === 2){
+                if(checkAlienAttach(heroX, heroY, alienX, alienY, alien)){
+                    life--;
+                    lifeLevel.innerHTML = life;
+                    console.log('heroY: ' + heroY + '\n' + 'alienY: ' + alienY);
+                }
+
+                if(indexImg === 2){ // Condicional do alien que salta por cima
                     
                     if(alienX <= heroX + 50){
                          if(alienY <= heroY){
@@ -342,27 +408,24 @@ function moveAlien(alien, indexImg) {
                          }else{
                             alien.src = 'img/alien2.png';
                             alien.style.left = `${heroX + 200}px`;
-                            life -= 2;
-                            lifeLevel.innerHTML = life;
                          }
                     }else{
                         alien.src = 'img/alien4.png';
                         alien.style.left = `${alienX - 4}px`;
                         alien.style.top = `${alienY - 2}px`;
                     }
-                }else{
+                }else{  // Condicional do alien redondo
                     if(alienX <= heroX){
                         if(alienY <= heroY){
                             alien.style.top = `${alienY + 4}px`;
                         }else{
                             alien.style.top = `${alienY - 100}px`;
-                            life--;
-                            lifeLevel.innerHTML = life;
                         }
                     }else{
                         alien.style.left = `${alienX - 4}px`;
                     }
                 }
+
             }
         }
 
@@ -395,6 +458,19 @@ function checkLaserCollision(laser, alien) {
         } else {
             return false;
         }
+        
+}
+
+//função para verifica ataque de aliens
+function checkAlienAttach(heroX, heroY, alienX, alienY, alien) {
+
+    if(!Array.from(alien.classList).includes('dead-alien')){
+        if(alienY >= heroY && alienX < heroX + 150){
+            return true;
+        }
+    }
+
+    return false;
         
 }
 
@@ -566,6 +642,7 @@ function thirdMission(){
         alert('A entrada está liberada!\nVá até a nave-mãe e pressione J...');
         pressJ = true;
         window.addEventListener('keydown', flyShip);
+        window.addEventListener('keyup', repositionPerson);
         
 
         alienDead = 0;
@@ -605,6 +682,7 @@ function runMission(){
                 yourShip.style.width = '200px';
                 yourShip.style.height = '200px';
                 yourShip.style.top = '380px';
+                window.addEventListener('keyup', repositionPerson);
                 break;
     }
 }
@@ -620,6 +698,8 @@ function finishGame(){
     let lasers = document.querySelectorAll('.laser');
     lasers.forEach((laser) => laser.remove());
     playArea.classList.remove(direction[indexDir]);
+    if(missions.mission >= 3)
+        window.removeEventListener('keyup', repositionPerson);
 }
 
 // Inserir objeto do propósito da missão seria criar um planeta Axius para a missão 1
