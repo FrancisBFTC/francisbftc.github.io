@@ -1086,7 +1086,7 @@ function runMission(){
                 yourShip.style.height = '200px';
                 yourShip.style.top = '380px';
                 window.addEventListener('keyup', repositionPerson);
-                speedAliens -= 5;
+                speedAliens = 20;
                 break;
         case 4: placar.innerHTML = "<h2> Tentativas: <label id='attempts'>" + attempts + "</label> | "
                         + " | Segundos: <label id='seconds'>" + seconds + "</label> | Missão: <label id='the-mission'>" + missions.mission +"</label></h2>";
