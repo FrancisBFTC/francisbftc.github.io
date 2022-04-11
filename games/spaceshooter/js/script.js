@@ -632,7 +632,7 @@ function gameOver(gameOverString) {
 // Função que processa a primeira missão do jogo
 function firstMission(){
     
-        if(missions.step1.year < 20){ //50     
+        if(missions.step1.year < 100){     
 
             if(indexDir === 0){
                 missions.step1.year++;
@@ -643,7 +643,7 @@ function firstMission(){
                 yearValue.style.color = 'red';
             }
         }else{
-            if(alienDead >= 10){ //10
+            if(alienDead >= 50){
                 musicMission.pause();
                 musicFinish.play();
 
@@ -686,7 +686,7 @@ function firstMission(){
 // Função que processa a segunda missão do jogo
 function secondMission() {
    
-        if(missions.step2.km < 20){  //100     
+        if(missions.step2.km < 200){     
 
             if(indexDir === 2){
                 missions.step2.km++;
@@ -697,7 +697,7 @@ function secondMission() {
                 kmValue.style.color = 'red';
             }
         }else{
-            if(alienDead >= 10){ //20
+            if(alienDead >= 100){
                 musicMission.pause();
                 musicFinish.play();
 
@@ -747,7 +747,7 @@ function secondMission() {
 }
 
 function thirdMission(){
-    if(alienDead >= 10){ //50
+    if(alienDead >= 150){
         musicMission.pause();
         musicFinish.play();
 
@@ -1074,7 +1074,7 @@ function runMission(){
                 playArea.classList.add('back-animate2');
                 missions.step2.running = true;
                 break;
-        case 3: placar.innerHTML = "<h2> Abatidos: <label id='abatidos'>" + alienDead + "</label> | "
+        case 3: placar.innerHTML = "<h2> Abatidos: <label id='abatidos'>" + alienDead + "</label>"
                         + " | Missão: <label id='the-mission'>" + missions.mission + "</label> | Vida: <label id='life'>" + life +"</label></h2>";
                 lifeLevel = document.getElementById('life');
                 initMission = setInterval(thirdMission, 500);
@@ -1088,7 +1088,7 @@ function runMission(){
                 window.addEventListener('keyup', repositionPerson);
                 speedAliens = 20;
                 break;
-        case 4: placar.innerHTML = "<h2> Tentativas: <label id='attempts'>" + attempts + "</label> | "
+        case 4: placar.innerHTML = "<h2> Tentativas: <label id='attempts'>" + attempts + "</label>"
                         + " | Segundos: <label id='seconds'>" + seconds + "</label> | Missão: <label id='the-mission'>" + missions.mission +"</label></h2>";
                 attemptsNum = document.getElementById('attempts');
                 secondsNum = document.getElementById('seconds');
@@ -1198,6 +1198,7 @@ function walkToMotherShip(){
     }
 }
 
+// Esconde as informações iniciais do jogo
 let hideInfoGame = (element) => {
     element.style.display = 'none';
     description.style.display = 'block';

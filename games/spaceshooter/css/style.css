@@ -17,7 +17,47 @@ body {
 	100%   { background-position: 0 0; }
 }
 
+@-webkit-keyframes slidedown {
+	0%    { background-position: 0 70000%; }
+	100%   { background-position: 0 0; }
+}
+
+@-moz-keyframes slidedown {
+	0%    { background-position: 0 70000%; }
+	100%   { background-position: 0 0; }
+}
+
+@-ms-keyframes slidedown {
+	0%     { background-position: 0 70000%; }
+	100%   { background-position: 0 0; }
+}
+
+@-o-keyframes slidedown {
+	0%     { background-position: 0 70000%; }
+	100%   { background-position: 0 0; }
+}
+
 @keyframes slideup {
+	from { background-position: 0 0; }
+	to   { background-position: 0 70000%; }
+}
+
+@-webkit-keyframes slideup {
+	from { background-position: 0 0; }
+	to   { background-position: 0 70000%; }
+}
+
+@-moz-keyframes slideup {
+	from { background-position: 0 0; }
+	to   { background-position: 0 70000%; }
+}
+
+@-ms-keyframes slideup {
+	from { background-position: 0 0; }
+	to   { background-position: 0 70000%; }
+}
+
+@-o-keyframes slideup {
 	from { background-position: 0 0; }
 	to   { background-position: 0 70000%; }
 }
@@ -27,7 +67,47 @@ body {
 	to   { background-position: 70000%; }
 }
 
+@-webkit-keyframes slideright {
+	from { background-position: 0; }
+	to   { background-position: 70000%; }
+}
+
+@-moz-keyframes slideright {
+	from { background-position: 0; }
+	to   { background-position: 70000%; }
+}
+
+@-ms-keyframes slideright {
+	from { background-position: 0; }
+	to   { background-position: 70000%; }
+}
+
+@-o-keyframes slideright {
+	from { background-position: 0; }
+	to   { background-position: 70000%; }
+}
+
 @keyframes slideleft {
+	from { background-position: 70000%; }
+	to   { background-position: 0; }
+}
+
+@-webkit-keyframes slideleft {
+	from { background-position: 70000%; }
+	to   { background-position: 0; }
+}
+
+@-moz-keyframes slideleft {
+	from { background-position: 70000%; }
+	to   { background-position: 0; }
+}
+
+@-ms-keyframes slideleft {
+	from { background-position: 70000%; }
+	to   { background-position: 0; }
+}
+
+@-o-keyframes slideleft {
 	from { background-position: 70000%; }
 	to   { background-position: 0; }
 }
@@ -82,18 +162,34 @@ body {
 
 .flying-down{
 	animation: slidedown 2500s infinite linear;
+	-webkit-animation: slidedown 2500s infinite linear;
+	-moz-animation   : slidedown 2500s infinite linear;
+	-ms-animation    : slidedown 2500s infinite linear;
+	-o-animation     : slidedown 2500s infinite linear;
 }
 
 .flying-up{
 	animation: slideup 2500s infinite linear;
+	-webkit-animation: slideup 2500s infinite linear;
+	-moz-animation   : slideup 2500s infinite linear;
+	-ms-animation    : slideup 2500s infinite linear;
+	-o-animation     : slideup 2500s infinite linear;
 }
 
 .flying-right{
 	animation: slideright 2500s infinite linear;
+	-webkit-animation: slideright 2500s infinite linear;
+	-moz-animation   : slideright 2500s infinite linear;
+	-ms-animation    : slideright 2500s infinite linear;
+	-o-animation     : slideright 2500s infinite linear;
 }
 
 .flying-left{
 	animation: slideleft 2500s infinite linear;
+	-webkit-animation: slideleft 2500s infinite linear;
+	-moz-animation   : slideleft 2500s infinite linear;
+	-ms-animation    : slideleft 2500s infinite linear;
+	-o-animation     : slideleft 2500s infinite linear;
 }
 
 .game-instructions{
@@ -220,7 +316,7 @@ body {
 	height: 80px;
 	width: 150px;
 	left: 140px;
-	top: 240px;
+	top: 440px;
 }
 
 .laser{
@@ -268,34 +364,34 @@ body {
 	width: 225px;
 	height: 200px;
 	background-image: url(../img/alienexplosion/explosion-alien.png);
-	animation: play3 .5s steps(16) infinite;
-	-webkit-animation: play3 .5s steps(16) infinite;
-       -moz-animation: play3 .5s steps(16) infinite;
-        -ms-animation: play3 .5s steps(16) infinite;
-         -o-animation: play3 .5s steps(16) infinite;
+	animation: playExplosion .5s steps(16) infinite;
+	-webkit-animation: playExplosion .5s steps(16) infinite;
+       -moz-animation: playExplosion .5s steps(16) infinite;
+        -ms-animation: playExplosion .5s steps(16) infinite;
+         -o-animation: playExplosion .5s steps(16) infinite;
 }
 
-@keyframes play3 {
+@keyframes playExplosion {
 	from {background-position:0px;}
 	to {background-position: -3600px;}
 }
 
-@-webkit-keyframes play3 {
+@-webkit-keyframes playExplosion {
    from { background-position:    0px; }
      to { background-position: -3600px; }
 }
 
-@-moz-keyframes play3 {
+@-moz-keyframes playExplosion {
    from { background-position:    0px; }
      to { background-position: -3600px; }
 }
 
-@-ms-keyframes play3 {
+@-ms-keyframes playExplosion {
    from { background-position:    0px; }
      to { background-position: -3600px; }
 }
 
-@-o-keyframes play3 {
+@-o-keyframes playExplosion {
    from { background-position:    0px; }
      to { background-position: -3600px; }
 }
