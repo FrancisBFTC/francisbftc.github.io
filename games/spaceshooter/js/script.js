@@ -10,8 +10,9 @@ const DOWN  = 1;
 const RIGHT = 2;
 const LEFT  = 3;
 
-var kmValue, abatidos, missionNum, yearValue, imgObj;
-var introMusic, musicMission, musicFinish;
+var kmValue, abatidos, missionNum, yearValue, imgObj, infoStatusGame, attemptsNum, secondsNum;
+var introMusic, musicMission, musicFinish, soundLaser, soundExpShip, soundExpAlien, soundAlienPassing;
+var soundOvni, soundMonsters, soundMonstersAtt, soundAlarmShip;
 
 var lifeLevel = "";
 
@@ -24,6 +25,10 @@ let alienDead = 0;
 let years     = 0;
 let distancy  = 0;
 let indexDir  = 0;
+
+let seconds = 60;
+let attempts = 3;
+
 
 let life = 100;
 let gameOverString;
@@ -71,10 +76,17 @@ let missions = {
         running: false
     },
 
+    step4 : {
+        msg: '4ª missão: Descubra a senha de desativação da nave-mãe através de um enigma que foi '
+        + 'criado pelos aliens e impeça que a nave decole em direção ao planeta terra!',
+        running: false
+    },
+
     mission: 1
 }; 
 
 instructionsText.innerHTML = `${missions.step1.msg}`;
+description.style.display = 'none';
 
 
 //movimento e tiro da nave
@@ -137,6 +149,7 @@ function flyShip(event) {
     }
 }
 
+// Reposiciona personagem quando ele para de correr
 function repositionPerson(event){
     if(event.key === 'a' || event.key === 'd'){
         yourShip.src = 'img/shooter/player_' + personDirection + '.png';
@@ -223,6 +236,7 @@ function changeDirectionSpace(index){
 
 //funcionalidade de tiro que cria o laser e o movimenta
 function fireLaser() {
+    soundLaser.play();
     let laser = createLaserElement();
     playArea.appendChild(laser);
     moveLaser(laser, personDirection, directionUp);
@@ -258,6 +272,7 @@ function readjustmentLaser(newLaser, xPosition, yPosition){
     }
 }
 
+// Função para mover o laser em diversas situações do jogo
 function moveLaser(laser, personDir, dirUp) {
     let laserInterval = setInterval(() => {
         let xPosition = parseInt(laser.style.left);
@@ -268,10 +283,20 @@ function moveLaser(laser, personDir, dirUp) {
 
         aliens.forEach((alien) => { //comparando se cada alien foi atingido, se sim, troca o src da imagem
             if(checkLaserCollision(laser, alien)) {
-                alien.src = 'img/explosion.png';
+
+                if(missions.mission >= 3){
+                     alien.src = 'img/alienexplosion/explosion-alien.png';
+                     let alienX = parseInt(alien.style.left);
+                     let alienY = parseInt(alien.style.top);
+                     alienExplosion(alienX, alienY);
+                }else{
+                   alien.src = 'img/explosion.png';
+                   soundExpShip.play();
+                }
+
                 alien.classList.remove('alien');
                 alien.classList.add('dead-alien');
-                alienDead++;
+                alienDead++; 
                 removeLaser(laser, laserInterval);
             }
         })
@@ -315,7 +340,28 @@ function moveLaser(laser, personDir, dirUp) {
 function removeLaser(laser, laserInterval){
     laser.remove();
     clearInterval(laserInterval);
+    laserInterval = null;
 }
+
+
+// Executa a explosão dos alienígenas na missão 3
+function alienExplosion(alienX,alienY) {
+
+        soundExpAlien.play();
+        $("#main-play-area").append("<div id='alien-explosion' class='explosion-alien-anim'></div");
+        $("#alien-explosion").css("top",alienY);
+        $("#alien-explosion").css("left",alienX);
+        
+        var explosionTime=window.setInterval(explosionReset, 500);
+        
+        function explosionReset() {
+            $("#alien-explosion").remove();
+            window.clearInterval(explosionTime);
+            explosionTime=null;
+        }
+
+}
+
 
 //função para criar inimigos aleatórios
 function createAliens() {
@@ -329,12 +375,16 @@ function createAliens() {
     let indexImg = 0;
 
     if(missions.step1.running){
+        soundOvni.play();
         newAlien.style.left = `${Math.floor(Math.random() * (sizeAreaX - 150)) + 150}px`;
         newAlien.style.top = `40px`;
     }else if(missions.step2.running){
+        soundOvni.play();
         newAlien.style.left = `${sizeAreaX}px`;
         newAlien.style.top = `${Math.floor(Math.random() * (sizeAreaY - 100)) + 100}px`;
+        soundOvni.play();
     }else if(missions.step3.running){
+        soundMonsters.play();
         indexImg = Math.floor(Math.random() * horrorAliens.length);
         let positionAlien = parseInt(window.getComputedStyle(imgObj).getPropertyValue('left'));
         newAlien.src = horrorAliens[indexImg];
@@ -350,54 +400,58 @@ function createAliens() {
     moveAlien(newAlien, indexImg);
 }
 
+// Função para excluir alien morto
+function excludeDeadAlien(alien, moveAlienInterval){
+    if(Array.from(alien.classList).includes('dead-alien')) {
+        alien.remove();
+        clearInterval(moveAlienInterval);
+        moveAlienInterval = null;
+    } else {
+        if(missions.mission < 3){
+            soundAlienPassing.play();
+            aliensPassed++;
+            alien.remove();
+            clearInterval(moveAlienInterval);
+            moveAlienInterval = null;
+            if(aliensPassed === 10)
+                gameOver('' + aliensPassed + ' naves passaram a fronteira...\nJá é o suficiente para aniquilar a humanidade!\nMissão fracassada!');
+        }
+    }
+}
+
 //função para movimentar os inimigos
 function moveAlien(alien, indexImg) {
     let moveAlienInterval = setInterval(() => {
         if(missions.step1.running){
             let yPosition = parseInt(window.getComputedStyle(alien).getPropertyValue('top'));
             let sizeAreaY = parseInt(playArea.getBoundingClientRect().height) - 20;
-            if(yPosition >= sizeAreaY) {
-                if(Array.from(alien.classList).includes('dead-alien')) {
-                    alien.remove();
-                    clearInterval(moveAlienInterval);
-                } else {
-                    aliensPassed++;
-                    alien.remove();
-                    clearInterval(moveAlienInterval);
-                    if(aliensPassed === 10)
-                        gameOver('' + aliensPassed + ' aliens passaram a fronteira...\nMissão falhada!');
-                }
-            } else {
+            
+            if(yPosition >= sizeAreaY) 
+                excludeDeadAlien(alien, moveAlienInterval);
+            else 
                 alien.style.top = `${yPosition + 4}px`;
-            }
+            
         }else{
             if(missions.mission !== 3){
                 let xPosition = parseInt(window.getComputedStyle(alien).getPropertyValue('left'));
 
-                if(xPosition <= 140) {
-                    if(Array.from(alien.classList).includes('dead-alien')) {
-                        alien.remove(); //alien.remove();
-                        clearInterval(moveAlienInterval);
-                    } else {
-                        aliensPassed++;
-                        alien.remove(); //alien.remove();
-                        clearInterval(moveAlienInterval);
-                        if(aliensPassed === 10)
-                            gameOver('' + aliensPassed + ' aliens passaram a fronteira...\nMissão falhada!');
-                    }
-                } else {
+                if(xPosition <= 140)
+                    excludeDeadAlien(alien, moveAlienInterval);
+                else 
                     alien.style.left = `${xPosition - 4}px`;
-                }
+                
             }else{
                 let alienX = parseInt(window.getComputedStyle(alien).getPropertyValue('left'));
                 let alienY = parseInt(window.getComputedStyle(alien).getPropertyValue('top'));
                 let heroX = parseInt(window.getComputedStyle(yourShip).getPropertyValue('left'));
                 let heroY = parseInt(window.getComputedStyle(yourShip).getPropertyValue('top'));
 
+                excludeDeadAlien(alien, moveAlienInterval);
+
                 if(checkAlienAttach(heroX, heroY, alienX, alienY, alien)){
                     life--;
                     lifeLevel.innerHTML = life;
-                    console.log('heroY: ' + heroY + '\n' + 'alienY: ' + alienY);
+                    soundMonstersAtt.play();
                 }
 
                 if(indexImg === 2){ // Condicional do alien que salta por cima
@@ -432,6 +486,7 @@ function moveAlien(alien, indexImg) {
         if(life <= 0){
             life = 0;
             clearInterval(moveAlienInterval);
+            moveAlienInterval = null;
         }
 
     }, 30);
@@ -485,28 +540,34 @@ function playGame() {
         introMusic.pause();
         musicMission.play();
 
-        startButton.style.display = 'none';
-        instructionsText.style.display = 'none';
         description.style.display = 'none';
         yourShip.style.left = "40%";
         yourShip.style.top = "75%";
-        window.addEventListener('keydown', flyShip);
 
         life = 100;
 
         runMission();
 
-        if(missions.step1.running || missions.step2.running){
-            playArea.classList.add(direction[indexDir]);
-        }
-        else if(missions.step3.running){
-            insertGoalObject('img/mother-ship.png', 'img-mother-ship');
+        if(missions.step4.running){
+            
+        }else{
+            window.addEventListener('keydown', flyShip);
+            abatidos = document.getElementById('abatidos');
+
+             if(missions.step1.running || missions.step2.running){
+                playArea.classList.add(direction[indexDir]);
+                missionNum = document.getElementById('the-mission');
+
+             }else if(missions.step3.running){
+                        insertGoalObject('img/mother-ship.png', 'img-mother-ship');
+                   }
+
+
+            alienInterval = setInterval(() => {
+                createAliens();
+            }, 2000);
         }
         
-
-        alienInterval = setInterval(() => {
-            createAliens();
-        }, 2000);
     }
 
 }
@@ -516,25 +577,33 @@ function gameOver(gameOverString) {
     finishGame();
 
     setTimeout(() => {
-        alert('game over! ' + gameOverString);
-        yourShip.style.top = "250px";
-        startButton.style.display = "block";
-        instructionsText.style.display = "block";
-        description.style.display = "block";
-        playArea.classList.remove('back-animate');
-        playArea.classList.add('back-default');
-        distancy = 0;
-        alienDead = 0;
-        aliensPassed = 0;
+        infoStatusGame.innerHTML = '<h2 style="color: red;">Game Over</h2>'
+                + '<p>' + gameOverString + '</p>'
+                +'<button id="buttonOk" style="color: white; background-color:black; border: 1px solid white;">OK</button>';
+        infoStatusGame.style.display = 'block';
+
+        document.getElementById('buttonOk').addEventListener('click', () => {
+            document.getElementById('buttonOk').removeEventListener('click', this);
+            infoStatusGame.innerHTML = '';
+            infoStatusGame.style.display = 'none';
+            yourShip.style.top = "250px";
+            description.style.display = "block";
+            playArea.classList.remove('back-animate');
+            playArea.classList.add('back-default');
+            distancy = 0;
+            alienDead = 0;
+            aliensPassed = 0;
+            missions.step1.year = 0;
+            missions.step2.km = 0;
+        });
+        
     });
 }
 
 // Função que processa a primeira missão do jogo
 function firstMission(){
-        yearValue = document.getElementById('year-light');
-        abatidos = document.getElementById('abatidos');
-        missionNum = document.getElementById('the-mission');
-        if(missions.step1.year < 50){      
+    
+        if(missions.step1.year < 2){ //50     
 
             if(indexDir === 0){
                 missions.step1.year++;
@@ -545,7 +614,7 @@ function firstMission(){
                 yearValue.style.color = 'red';
             }
         }else{
-            if(alienDead >= 10){
+            if(alienDead >= 2){ //10
                 musicMission.pause();
                 musicFinish.play();
 
@@ -557,17 +626,27 @@ function firstMission(){
                 finishGame();
 
                 setTimeout(() => {
-                    alert('Você chegou no Planeta Axius!\nViage até o planeta pressionando J');
-                    pressJ = true;
-                    window.addEventListener('keydown', flyShip);
+                   infoStatusGame.innerHTML = '<h2 style="color: green;">Sucesso</h2>'
+                    + '<p>Você encontrou o Planeta Axius! Posicione-se no planeta e viaje pela tecla J.</p>'
+                    +'<button id="buttonOk" style="color: white; background-color:black; border: 1px solid white;">OK</button>';
+                    infoStatusGame.style.display = 'block';
+
+                    document.getElementById('buttonOk').addEventListener('click', () => {
+                        window.addEventListener('keydown', flyShip);
+                        document.getElementById('buttonOk').removeEventListener('click', this);
+                        infoStatusGame.innerHTML = '';
+                        infoStatusGame.style.display = 'none';
+                        pressJ = true;
+                        missions.step1.running = false;
+                        years = 0;
+                        alienDead = 0;
+                        indexDir = 2;
+                        missions.mission++;
+                        instructionsText.innerHTML = `${missions.step2.msg}`;
+                    });
+                    
                 });
                 
-                missions.step1.running = false;
-                years = 0;
-                alienDead = 0;
-                indexDir = 2;
-                missions.mission++;
-                instructionsText.innerHTML = `${missions.step2.msg}`;
             }
         }
 
@@ -577,10 +656,8 @@ function firstMission(){
 
 // Função que processa a segunda missão do jogo
 function secondMission() {
-    kmValue = document.getElementById('km-value');
-    abatidos = document.getElementById('abatidos');
-    missionNum = document.getElementById('the-mission');
-        if(missions.step2.km < 100){      
+   
+        if(missions.step2.km < 2){  //100     
 
             if(indexDir === 2){
                 missions.step2.km++;
@@ -591,7 +668,7 @@ function secondMission() {
                 kmValue.style.color = 'red';
             }
         }else{
-            if(alienDead >= 20){
+            if(alienDead >= 2){ //20
                 musicMission.pause();
                 musicFinish.play();
 
@@ -605,23 +682,34 @@ function secondMission() {
                 finishGame();
 
                 setTimeout(() => {
-                    alert('Você encontrou a nave mãe em Axius! Algo te espera...');
-                    yourShip.style.top = "250px";
-                    startButton.style.display = "block";
-                    instructionsText.style.display = "block";
-                    description.style.display = "block";
-                    playArea.classList.remove('back-animate2');
-                    playArea.classList.add('back-default');
-                    playArea.removeChild(imgObj);
-                    musicFinish.pause();
-                    introMusic.play();
+                    infoStatusGame.innerHTML = '<h2 style="color: green;">Sucesso</h2>'
+                    + '<p>Você encontrou a nave mãe em Axius! Coisas te esperam...</p>'
+                    +'<button id="buttonOk" style="color: white; background-color:black; border: 1px solid white;">OK</button>';
+                    infoStatusGame.style.display = 'block';
+
+
+                   document.getElementById('buttonOk').addEventListener('click', () => {
+                        window.addEventListener('keydown', flyShip);
+                        document.getElementById('buttonOk').removeEventListener('click', this);
+                        infoStatusGame.innerHTML = '';
+                        infoStatusGame.style.display = 'none';
+                        yourShip.style.top = "250px";
+                        description.style.display = "block";
+                        playArea.classList.remove('back-animate2');
+                        playArea.classList.add('back-default');
+                        playArea.removeChild(imgObj);
+                        musicFinish.pause();
+                        introMusic.play();
+                        missions.step2.running = false;
+                        distancy = 0;
+                        alienDead = 0;
+                        missions.mission++;
+                        instructionsText.innerHTML = `${missions.step3.msg}`;
+                    });
+
+                    
                 });
 
-                missions.step2.running = false;
-                distancy = 0;
-                alienDead = 0;
-                missions.mission++;
-                instructionsText.innerHTML = `${missions.step3.msg}`;
             }
         }
 
@@ -630,26 +718,68 @@ function secondMission() {
 }
 
 function thirdMission(){
-    abatidos = document.getElementById('abatidos');
-    lifeLevel = document.getElementById('life');
-
-    if(alienDead >= 50){
+    if(alienDead >= 2){ //50
         musicMission.pause();
         musicFinish.play();
 
         finishGame();
+         infoStatusGame.innerHTML = '<h2 style="color: green;">Sucesso</h2>'
+                    + '<p>A entrada está liberada! Vá até a nave-mãe e pressione J...</p>'
+                    +'<button id="buttonOk" style="color: white; background-color:black; border: 1px solid white;">OK</button>';
+                    infoStatusGame.style.display = 'block';
 
-        alert('A entrada está liberada!\nVá até a nave-mãe e pressione J...');
-        pressJ = true;
-        window.addEventListener('keydown', flyShip);
-        window.addEventListener('keyup', repositionPerson);
+                    document.getElementById('buttonOk').addEventListener('click', () => {
+                        document.getElementById('buttonOk').removeEventListener('click', this);
+                        infoStatusGame.innerHTML = '';
+                        infoStatusGame.style.display = 'none';
+                        pressJ = true;
+                        window.addEventListener('keydown', flyShip);
+                        window.addEventListener('keyup', repositionPerson);
+                    });
+
         
-
+        
+        distancy = 0;
         alienDead = 0;
         missions.mission++;
         missions.step3.running = false;
-       // instructionsText.innerHTML = `${missions.step4.msg}`;
+        instructionsText.innerHTML = `${missions.step4.msg}`;
 
+    }
+}
+
+function fourthMission(){
+    if(seconds === 0 || attempts === 0){
+            musicMission.pause();
+            musicFinish.play();
+            
+            setTimeout(() => {
+                    infoStatusGame.innerHTML = '<h2 style="color: red;">Game Over!</h2>'
+                    + '<p>Você falhou em sua missão, agora a nave-mãe está a caminho da terra!</p>'
+                    +'<button id="buttonOk" style="color: white; background-color:black; border: 1px solid white;">OK</button>';
+                    infoStatusGame.style.display = 'block';
+
+
+                   document.getElementById('buttonOk').addEventListener('click', () => {
+                        window.addEventListener('keydown', flyShip);
+                        document.getElementById('buttonOk').removeEventListener('click', this);
+                        clearInterval(initMission);
+                        infoStatusGame.innerHTML = '';
+                        infoStatusGame.style.display = 'none';
+                        description.style.display = "block";
+                        playArea.classList.remove('front-panel');
+                        playArea.classList.add('back-default');
+                        musicFinish.pause();
+                        introMusic.play();
+                        missions.step4.running = false;
+                        attempts = 3;
+                        seconds = 60;
+                    });
+            });
+
+    }else{
+        seconds--;
+        secondsNum.innerHTML = seconds;
     }
 }
 
@@ -659,6 +789,7 @@ function runMission(){
         case 1: placar.innerHTML = "<h2> Abatidos: <label id='abatidos'>" + alienDead + "</label> | "
                         + "Anos-Luz: <label id='year-light'>" + years + "</label>"
                         +" | Missão: <label id='the-mission'>" + missions.mission + "</label> | Vida: <label id='life'>" + life +"</label></h2>";
+                yearValue = document.getElementById('year-light');
                 initMission = setInterval(firstMission, 500);
                 playArea.classList.remove('back-default');
                 playArea.classList.add('back-animate');
@@ -667,6 +798,7 @@ function runMission(){
         case 2: placar.innerHTML = "<h2> Abatidos: <label id='abatidos'>" + alienDead + "</label> | "
                         + "Distância: <label id='km-value'>" + distancy + "km</label>"
                         +" | Missão: <label id='the-mission'>" + missions.mission + "</label> | Vida: <label id='life'>" + life +"</label></h2>";
+                kmValue = document.getElementById('km-value');
                 initMission = setInterval(secondMission, 500);
                 playArea.classList.remove('back-default');
                 playArea.classList.add('back-animate2');
@@ -674,6 +806,7 @@ function runMission(){
                 break;
         case 3: placar.innerHTML = "<h2> Abatidos: <label id='abatidos'>" + alienDead + "</label> | "
                         + " | Missão: <label id='the-mission'>" + missions.mission + "</label> | Vida: <label id='life'>" + life +"</label></h2>";
+                lifeLevel = document.getElementById('life');
                 initMission = setInterval(thirdMission, 500);
                 playArea.classList.remove('back-default');
                 playArea.classList.add('back-animate2');
@@ -683,6 +816,16 @@ function runMission(){
                 yourShip.style.height = '200px';
                 yourShip.style.top = '380px';
                 window.addEventListener('keyup', repositionPerson);
+                break;
+        case 4: placar.innerHTML = "<h2> Tentativas: <label id='attempts'>" + attempts + "</label> | "
+                        + " | Segundos: <label id='seconds'>" + seconds + "</label> | Missão: <label id='the-mission'>" + missions.mission +"</label></h2>";
+                attemptsNum = document.getElementById('attempts');
+                secondsNum = document.getElementById('seconds');
+                initMission = setInterval(fourthMission, 1000);
+                playArea.classList.remove('back-default');
+                playArea.classList.add('front-panel');
+                missions.step4.running = true;
+                yourShip.src = '';
                 break;
     }
 }
@@ -742,8 +885,6 @@ function flyIntoPlanet(){
             }else{
                 playArea.removeChild(imgObj);
                 yourShip.style.top = "250px";
-                startButton.style.display = "block";
-                instructionsText.style.display = "block";
                 description.style.display = "block";
                 playArea.classList.remove('back-animate');
                 playArea.classList.add('back-default');
@@ -762,38 +903,65 @@ function flyIntoPlanet(){
     }
 }
 
+
+// Para verificar se a posição do personagem está próximo a nave-mãe
 function walkToMotherShip(){
     let motherShipX = parseInt(getComputedStyle(imgObj).getPropertyValue('left'));
     let heroX = parseInt(getComputedStyle(yourShip).getPropertyValue('left'))
 
     if(heroX >= motherShipX){
         playArea.removeChild(imgObj);
+        playArea.removeChild(yourShip);
         yourShip.style.top = "250px";
-        startButton.style.display = "block";
-        instructionsText.style.display = "block";
         description.style.display = "block";
         playArea.classList.remove('back-animate2');
         playArea.classList.add('back-default');
         pressJ = false;
+        window.removeEventListener('keydown', flyShip);
+        window.removeEventListener('keyup', repositionPerson);
         musicFinish.pause();
-        introMusic.play();
-        alert('A nova missão será implementada em breve!\nJuntamente com outros movimentos do personagem... :)');
-        location.reload();       
+        introMusic.play();     
     }else{
         alert('Você não está próximo a nave!\nCaminhe até a nave digitando D');
     }
 }
 
+let hideInfoGame = (element) => {
+    element.style.display = 'none';
+    description.style.display = 'block';
+    infoStatusGame = element;
+}
 
 let initMusic = () => {
     introMusic = document.getElementById('intro-music-menu');
     musicMission = document.getElementById('music-mission');
     musicFinish = document.getElementById('music-mission-finish');
+    soundLaser = document.getElementById("laser-sound");
+    soundExpShip = document.getElementById("explosion-ship-sound");
+    soundExpAlien = document.getElementById("explosion-alien-sound");
+    soundAlienPassing = document.getElementById("alien-passing-sound");
+
+    soundOvni = document.getElementById("ovni-sound");
+    soundMonsters = document.getElementById("monsters-sound");
+    soundMonstersAtt = document.getElementById("monsters-attach");
+    soundAlarmShip = document.getElementById("mothership-alarm");
 
     introMusic.addEventListener("ended", function(){ 
         introMusic.currentTime = 0; 
         introMusic.play(); 
     }, false);
+
+    musicFinish.addEventListener("ended", function(){ 
+        musicFinish.currentTime = 0; 
+        musicFinish.play(); 
+    }, false);
+
+    musicMission.addEventListener("ended", function(){ 
+        musicMission.currentTime = 0; 
+        musicMission.play(); 
+    }, false);
+
+
 
     introMusic.play();
 }

@@ -75,6 +75,11 @@ body {
 	background-size: cover;
 }
 
+.front-panel{
+	background-image: url('../img/computer-panel/front-panel.jpg');
+	background-size: cover;
+}
+
 .flying-down{
 	animation: slidedown 2500s infinite linear;
 }
@@ -104,11 +109,54 @@ body {
 	text-shadow: 1px 3px rgba(0, 0, 255, 0.7);
 }
 
+.info-game{
+	border: 2px solid white;
+	background-color: black;
+	text-align: justify;
+	text-align: center;
+	padding: 5px;
+	color: white;
+	width: 80%;
+	height: auto;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 25px;
+	font-family: monospace;
+	font-size: 14px;
+}
+
+.info-game button{
+	margin-top: 10px;
+	margin-bottom: 10px;
+	cursor: pointer;
+	border: 1px solid white;
+	background-color: black;
+	color: white;
+	padding: 8px;
+	width: 100px;
+}
+
+.info-game button:hover{
+	transition: .5s ease-in-out;
+	background-color: blue;
+}
+
+
 .start-button{
 	margin-top: 5%;
 	text-align: center;
 	color: white;
 	cursor: pointer;
+	margin-left: auto;
+	margin-right: auto;
+	width: 12rem;
+	height: 6rem;
+}
+
+.start-button:hover{
+	transition: .5s ease-in-out;
+	text-shadow: 2px 3px rgba(255, 255, 255, 0.9);
+	color: blue;
 }
 
 .player-shooter{
@@ -151,4 +199,47 @@ body {
 	top: 590px;
 	font-family: Consolas;
 	color: white;
+}
+
+
+#alien-explosion {
+	width: 225px;
+	height: 200px;
+	position:absolute;
+}
+
+.explosion-alien-anim {
+	width: 225px;
+	height: 200px;
+	background-image: url(../img/alienexplosion/explosion-alien.png);
+	animation: play3 .5s steps(16) infinite;
+	-webkit-animation: play3 .5s steps(16) infinite;
+       -moz-animation: play3 .5s steps(16) infinite;
+        -ms-animation: play3 .5s steps(16) infinite;
+         -o-animation: play3 .5s steps(16) infinite;
+}
+
+@keyframes play3 {
+	from {background-position:0px;}
+	to {background-position: -3600px;}
+}
+
+@-webkit-keyframes play3 {
+   from { background-position:    0px; }
+     to { background-position: -3600px; }
+}
+
+@-moz-keyframes play3 {
+   from { background-position:    0px; }
+     to { background-position: -3600px; }
+}
+
+@-ms-keyframes play3 {
+   from { background-position:    0px; }
+     to { background-position: -3600px; }
+}
+
+@-o-keyframes play3 {
+   from { background-position:    0px; }
+     to { background-position: -3600px; }
 }
