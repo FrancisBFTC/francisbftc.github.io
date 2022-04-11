@@ -4,6 +4,7 @@ const instructionsText = document.querySelector('.game-instructions');
 const description      = document.querySelector('.description-mission');
 const startButton      = document.querySelector('.start-button');
 const placar           = document.getElementById('placar');
+const panelButtons     = document.querySelector('.panel');
 
 const UP    = 0;
 const DOWN  = 1;
@@ -13,6 +14,7 @@ const LEFT  = 3;
 var kmValue, abatidos, missionNum, yearValue, imgObj, infoStatusGame, attemptsNum, secondsNum;
 var introMusic, musicMission, musicFinish, soundLaser, soundExpShip, soundExpAlien, soundAlienPassing;
 var soundOvni, soundMonsters, soundMonstersAtt, soundAlarmShip;
+
 
 var lifeLevel = "";
 
@@ -36,6 +38,26 @@ let personDirection = "right";
 let directionUp = "";
 let counterRun = 0;
 let canRunCounter = 0;
+
+let orderColor = 0;
+let resultColor = 0;
+
+const mathOperations = ['+', '-'];
+let arrayResult = [];
+
+let arrayChars = "ABCDEFGHIJKLMNOP";
+
+
+const arrayColors = ['#0318E3', '#69E301', '#01B9D0', '#E46303', '#CD02E3', '#5801E3'];
+
+const imgColors = [
+    'computer-panel/blue-button.png',
+    'computer-panel/green-button.png',
+    'computer-panel/lightblue-button.png',
+    'computer-panel/orange-button.png',
+    'computer-panel/pink-button.png',
+    'computer-panel/purple-button.png'
+];
 
 const direction = [
     'flying-down',
@@ -549,7 +571,7 @@ function playGame() {
         runMission();
 
         if(missions.step4.running){
-            
+            runLastMission();
         }else{
             window.addEventListener('keydown', flyShip);
             abatidos = document.getElementById('abatidos');
@@ -750,9 +772,9 @@ function thirdMission(){
 
 function fourthMission(){
     if(seconds === 0 || attempts === 0){
-            musicMission.pause();
+            soundAlarmShip.pause();
             musicFinish.play();
-            
+
             setTimeout(() => {
                     infoStatusGame.innerHTML = '<h2 style="color: red;">Game Over!</h2>'
                     + '<p>Você falhou em sua missão, agora a nave-mãe está a caminho da terra!</p>'
@@ -782,6 +804,151 @@ function fourthMission(){
         secondsNum.innerHTML = seconds;
     }
 }
+
+// Função para executar 4ª missão
+function runLastMission(){
+    infoStatusGame.innerHTML = '<h2 style="color: yellow;">Regras do enigma</h2>'
+                    + '<div class="list">'
+                    + '<ol>'
+                    + '<li>Memorize 8 cálculos que vão aparecer na tela </li>'
+                    + '<li>Memorize a ordem da piscagem entre os 6 botões coloridos </li>'
+                    + '<li>Cada resultado de um cálculo será um número de uma letra na tabela de caracteres </li>'
+                    + '<li>Forme a sequência de 8 caracteres e insira a senha pra desativação da nave </li>'
+                    + '<li>Valide a senha com o botão colorido correto após for especificado sua ordem </li>'
+                    + '</ol>'
+                    + '<p>Você tem no máximo 3 tentativas de inserir a senha num tempo de 60 segundos após os ' 
+                    + 'os cálculos aparecer na tela e a piscagem dos botões acabar. Se estas regras não forem '
+                    + 'cumpridas, a missão será fracassada e a nave irá se explodir no planeta terra. </p>'
+                    + '<p>Até aqui você teve uma boa demonstração de força, agora supere os alienígenas na inteligência.'
+                    + '<br>Boa Sorte soldado!</p>'
+                    + '</div>'
+                    +'<button id="buttonOk" style="color: white; background-color:black; border: 1px solid white;">OK</button>';
+                    infoStatusGame.style.display = 'block';
+
+    document.getElementById('buttonOk').addEventListener('click', () => {
+        document.getElementById('buttonOk').removeEventListener('click', this);
+
+        infoStatusGame.innerHTML = '<input type="password" placeholder="digite a senha aqui" class="input-enigm" style="display: none;">'
+                                 + '<div class="enigm-div" style="display:block;">'
+                                    + '<label class="num1"></label> ' 
+                                    + '<label class="operation"></label> '
+                                    + '<label class="num2"></label> = '
+                                 + '</div>'
+                                 + '<div class="table-chars" style="display:none;">'
+                                 + '<table border="2">'
+                                    + '<tr><th colspan="17" style="text-align: center;">Tabela de Caracteres</th></tr>'
+                                    + '<tr><th>Nº</th> <td>-5</td> <td>-4</td> <td>-3</td> <td>-2</td> <td>-1</td> <td>0</td> <td>1</td> <td>2</td> <td>3</td> <td>4</td> <td>5</td> <td>6</td> <td>7</td> <td>8</td> <td>9</td> <td>10</td></tr>'
+                                    + '<tr><th>Chars</th> <td>A</td> <td>B</td> <td>C</td> <td>D</td> <td>E</td> <td>F</td> <td>G</td> <td>H</td> <td>I</td> <td>J</td> <td>K</td> <td>L</td> <td>M</td> <td>N</td> <td>O</td> <td>P</td></tr>'
+                                 + '</table>'
+                                 + '</div>'
+                                 + '<div class="color-square" style="display: none;">'
+
+                                 + '</div>'; 
+
+        let num1 = document.querySelector('.num1');
+        let num2 = document.querySelector('.num2');
+        let operation = document.querySelector('.operation');
+        let inputEnigm = document.querySelector('.input-enigm');
+        let enigmDiv = document.querySelector('.enigm-div');
+        let tableChars = document.querySelector('.table-chars');
+        let colorSquare = document.querySelector('.color-square');
+
+        let countChangeNum = 0;
+        arrayResult = [];
+
+        panelButtons.style.display = 'none';
+
+        let changeNumber = setInterval(() => {
+            if(countChangeNum < 8){
+                let numRand1 = parseInt(Math.floor(Math.random() * 6));
+                let numRand2 = parseInt(Math.floor(Math.random() * 6));
+                let op = mathOperations[parseInt(Math.floor(Math.random() * mathOperations.length))];
+
+                num1.innerHTML = numRand1;
+                num2.innerHTML = numRand2;
+                operation.innerHTML = op;
+
+                if(op === '+')
+                    arrayResult.push(numRand1 + numRand2);
+                else
+                    arrayResult.push(numRand1 - numRand2);
+
+
+                countChangeNum++;
+            }else{
+                clearInterval(changeNumber);
+                changeNumber = null;
+                enigmDiv.style.display = 'none';
+                colorSquare.style.display = 'block';
+
+                orderColor = parseInt(Math.floor(Math.random() * 8));
+
+                let counterSquare = 0;
+                let counterColor = 0;
+                let randomSquare = setInterval(() => {
+                    if(counterSquare <= 16){
+                        if(counterSquare % 2 === 0){
+                            let randomColor = parseInt(Math.floor(Math.random() * arrayColors.length));
+                            colorSquare.style.backgroundColor = arrayColors[randomColor];
+                            if(counterColor === orderColor)
+                                resultColor = randomColor; // Salva a cor do botão correto
+
+                            counterColor++;
+                        }else{
+                            colorSquare.style.backgroundColor = 'black';
+                        }
+                    }else{
+                        clearInterval(randomSquare);
+                        randomSquare = null;
+                        colorSquare.style.display = 'none';
+                        inputEnigm.style.display = 'block';
+                        tableChars.style.display = 'block';
+                        panelButtons.style.display = 'block';
+                        alert('Execute a senha pressionando o botão com a ' + (orderColor + 1) + 'ª cor apresentada na sequência!');
+                        initMission = setInterval(fourthMission, 1000);
+                        musicMission.pause();
+                        soundAlarmShip.play();
+                    }
+                    counterSquare++;
+                }, 500);
+
+            }
+        }, 1000);
+
+    
+    });
+
+
+}
+
+function detectImg(element){
+    let pathImg = element.src;
+    let correctButton = imgColors[resultColor];
+    if(pathImg.includes(correctButton)){
+        let inputText = document.querySelector('.input-enigm');
+        let valueText = inputText.value;
+
+        for(let i = 0; i < arrayResult.length; i++){
+            if(valueText[i] !== arrayChars[arrayResult[i + 5]]){
+                attempts--;
+                attemptsNum.innerHTML = attempts;
+                alert('Senha incorreta! falta +' + attempts + ' tentativa(s).');
+                break;
+            }else{
+                alert('Letra correta!');
+            }
+        }
+    }else{
+        attempts--;
+        attemptsNum.innerHTML = attempts;
+        if(attempts > 0){
+            alert('Botão incorreto! falta +' + attempts + ' tentativa(s).');
+        }else{
+            panelButtons.style.display = 'none';
+        }
+    }
+}
+
 
 // Função que escolhe qual missão  executar em order 
 function runMission(){
@@ -821,7 +988,6 @@ function runMission(){
                         + " | Segundos: <label id='seconds'>" + seconds + "</label> | Missão: <label id='the-mission'>" + missions.mission +"</label></h2>";
                 attemptsNum = document.getElementById('attempts');
                 secondsNum = document.getElementById('seconds');
-                initMission = setInterval(fourthMission, 1000);
                 playArea.classList.remove('back-default');
                 playArea.classList.add('front-panel');
                 missions.step4.running = true;
