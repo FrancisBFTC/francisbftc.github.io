@@ -21,6 +21,13 @@ var lifeLevel = "";
 let alienInterval, initMission;
 
 let pressJ    = false;
+let successMission4 = false;
+let failTime = false;
+let failPass = false;
+let failButton = false;
+let failAttempt = false;
+let valueText;
+
 
 let aliensPassed = 0;
 let alienDead = 0;
@@ -33,6 +40,7 @@ let attempts = 3;
 
 
 let life = 100;
+let speedAliens = 25;
 let gameOverString;
 let personDirection = "right";
 let directionUp = "";
@@ -44,7 +52,6 @@ let resultColor = 0;
 
 const mathOperations = ['+', '-'];
 let arrayResult = [];
-
 let arrayChars = "ABCDEFGHIJKLMNOP";
 
 
@@ -81,19 +88,19 @@ const horrorAliens = [
 
 let missions = {
     step1 : {
-        msg: '1ª missão: Elimine os 10 alienígenas até 50 Anos-luz ' 
+        msg: '1ª missão: Elimine os 50 alienígenas até 100 Anos-luz ' 
           + 'ao norte do espaço e encontre o planeta Axius!',
         running: false,
         year: 0
     },
     step2 : {
-        msg: '2ª missão: Elimine os 20 alienígenas voando até 100km e ' 
+        msg: '2ª missão: Elimine os 100 alienígenas voando até 200km e ' 
           + 'encontre a nave mãe de Axius!',
         running: false,
         km: 0
     },
     step3 : {
-        msg: '3ª missão: Extermine os 50 aliens monstruosos para liberar entrada ' 
+        msg: '3ª missão: Extermine os 150 aliens monstruosos para liberar entrada ' 
           + 'na nave mãe!',
         running: false
     },
@@ -511,7 +518,7 @@ function moveAlien(alien, indexImg) {
             moveAlienInterval = null;
         }
 
-    }, 30);
+    }, speedAliens);
 
     if(life <= 0)
         gameOver(' Você foi morto pelos aliens!');
@@ -587,7 +594,7 @@ function playGame() {
 
             alienInterval = setInterval(() => {
                 createAliens();
-            }, 2000);
+            }, 1000);
         }
         
     }
@@ -625,7 +632,7 @@ function gameOver(gameOverString) {
 // Função que processa a primeira missão do jogo
 function firstMission(){
     
-        if(missions.step1.year < 2){ //50     
+        if(missions.step1.year < 20){ //50     
 
             if(indexDir === 0){
                 missions.step1.year++;
@@ -636,7 +643,7 @@ function firstMission(){
                 yearValue.style.color = 'red';
             }
         }else{
-            if(alienDead >= 2){ //10
+            if(alienDead >= 10){ //10
                 musicMission.pause();
                 musicFinish.play();
 
@@ -679,7 +686,7 @@ function firstMission(){
 // Função que processa a segunda missão do jogo
 function secondMission() {
    
-        if(missions.step2.km < 2){  //100     
+        if(missions.step2.km < 20){  //100     
 
             if(indexDir === 2){
                 missions.step2.km++;
@@ -690,7 +697,7 @@ function secondMission() {
                 kmValue.style.color = 'red';
             }
         }else{
-            if(alienDead >= 2){ //20
+            if(alienDead >= 10){ //20
                 musicMission.pause();
                 musicFinish.play();
 
@@ -740,7 +747,7 @@ function secondMission() {
 }
 
 function thirdMission(){
-    if(alienDead >= 2){ //50
+    if(alienDead >= 10){ //50
         musicMission.pause();
         musicFinish.play();
 
@@ -771,37 +778,112 @@ function thirdMission(){
 }
 
 function fourthMission(){
-    if(seconds === 0 || attempts === 0){
+    if(!successMission4){
+            if(seconds === 0 || attempts === 0){
+                soundAlarmShip.pause();
+                musicFinish.play();
+
+
+                setTimeout(() => {
+                    failTime = seconds === 0;
+                    failAttempt = attempts === 0;
+
+                    let msgFail = "";
+                    let msgTime = "";
+                    if(failTime){
+                        msgTime = "Seu tempo acabou!";
+                    }else{ 
+
+                        if(failAttempt){
+
+                            if(failButton && failPass){
+                                msgTime = "Botão e Senha Incorretos!";
+                            }else if(failButton && !failPass){
+                                msgTime = "Botão Incorreto, no entanto, a sua senha está correta!";
+                            }else{
+                                if(failButton)
+                                    msgTime = "Botão Incorreto!";
+                                else
+                                    msgTime = "Senha Incorreta!";
+                            }
+                            
+                            let password = "";
+                            for(let i = 0; i < arrayResult.length; i++)
+                                password += arrayChars[arrayResult[i] + 5];
+
+                            msgTime += " A senha correta é '<label style='color:green;'>"+password+"</label>' e você digitou '<label style='color:green;'>"+valueText+"</label>'.";
+                        }
+                    }
+                        
+                        infoStatusGame.innerHTML = '<h2 style="color: red;">Game Over!</h2>'
+                        + '<p>'+msgTime+' Você falhou em sua missão, agora a nave-mãe está a caminho da terra!</p>'
+                        +'<button id="buttonOk" style="color: white; background-color:black; border: 1px solid white;">OK</button>';
+                        infoStatusGame.style.display = 'block';
+                        panelButtons.style.display = 'none';
+
+                        clearInterval(initMission);
+
+                       document.getElementById('buttonOk').addEventListener('click', () => {
+                            document.getElementById('buttonOk').removeEventListener('click', this);
+                            infoStatusGame.innerHTML = '';
+                            infoStatusGame.style.display = 'none';
+                            description.style.display = "block";
+                            playArea.classList.remove('front-panel');
+                            playArea.classList.add('back-default');
+                            musicFinish.pause();
+                            introMusic.play();
+                            missions.step4.running = false;
+                            attempts = 3;
+                            seconds = 60;
+                            failPass = false;
+                            failButton = false;
+                            failTime = false;
+                            failAttempt = false;
+                            valueText = "";
+                        });
+                });
+
+        }else{
+            seconds--;
+            secondsNum.innerHTML = seconds;
+        }
+    }else{
             soundAlarmShip.pause();
             musicFinish.play();
 
             setTimeout(() => {
-                    infoStatusGame.innerHTML = '<h2 style="color: red;">Game Over!</h2>'
-                    + '<p>Você falhou em sua missão, agora a nave-mãe está a caminho da terra!</p>'
+                
+                let password = "";
+                for(let i = 0; i < arrayResult.length; i++)
+                    password += arrayChars[arrayResult[i] + 5];
+                
+
+                infoStatusGame.innerHTML = '<h2 style="color: green;">Sucesso!</h2>'
+                    + '<p>Nave desbloqueada... Interrompendo lançamento automático!\n<label style="color: yellow;">Parabéns novo herói!</label> A senha é <label style="color:green;">'+password+'</label>. Você resolveu o enigma a tempo e o seu planeta está a salvo!</p>'
                     +'<button id="buttonOk" style="color: white; background-color:black; border: 1px solid white;">OK</button>';
                     infoStatusGame.style.display = 'block';
 
+                    clearInterval(initMission);
 
-                   document.getElementById('buttonOk').addEventListener('click', () => {
-                        window.addEventListener('keydown', flyShip);
+                    document.getElementById('buttonOk').addEventListener('click', () => {
                         document.getElementById('buttonOk').removeEventListener('click', this);
-                        clearInterval(initMission);
-                        infoStatusGame.innerHTML = '';
-                        infoStatusGame.style.display = 'none';
-                        description.style.display = "block";
-                        playArea.classList.remove('front-panel');
-                        playArea.classList.add('back-default');
-                        musicFinish.pause();
-                        introMusic.play();
-                        missions.step4.running = false;
-                        attempts = 3;
-                        seconds = 60;
+                       // infoStatusGame.innerHTML = '';
+                       // infoStatusGame.style.display = 'none';
+                       // description.style.display = "block";
+                       // playArea.classList.remove('front-panel');
+                       // playArea.classList.add('back-default');
+                       // musicFinish.pause();
+                       // introMusic.play();
+                       // missions.step4.running = false;
+                       // attempts = 3;
+                       // seconds = 60;
+                       // successMission4 = false;
+                        alert('Obrigado por chegar até aqui, se gostou do jogo deixe uma estrelinha no repositório github, isto vai me ajudar!\n'
+                              + 'Em breve novas missões serão implementadas, aguarde.');
+                        location.reload();
                     });
             });
 
-    }else{
-        seconds--;
-        secondsNum.innerHTML = seconds;
     }
 }
 
@@ -828,7 +910,7 @@ function runLastMission(){
     document.getElementById('buttonOk').addEventListener('click', () => {
         document.getElementById('buttonOk').removeEventListener('click', this);
 
-        infoStatusGame.innerHTML = '<input type="password" placeholder="digite a senha aqui" class="input-enigm" style="display: none;">'
+        infoStatusGame.innerHTML = '<input type="password" value="" placeholder="digite a senha aqui" class="input-enigm" style="display: none;">'
                                  + '<div class="enigm-div" style="display:block;">'
                                     + '<label class="num1"></label> ' 
                                     + '<label class="operation"></label> '
@@ -921,32 +1003,53 @@ function runLastMission(){
 
 }
 
+// Função que detecta botão colorido correto de acordo com a imagem e a cor
 function detectImg(element){
     let pathImg = element.src;
     let correctButton = imgColors[resultColor];
-    if(pathImg.includes(correctButton)){
-        let inputText = document.querySelector('.input-enigm');
-        let valueText = inputText.value;
 
-        for(let i = 0; i < arrayResult.length; i++){
-            if(valueText[i] !== arrayChars[arrayResult[i + 5]]){
-                attempts--;
-                attemptsNum.innerHTML = attempts;
-                alert('Senha incorreta! falta +' + attempts + ' tentativa(s).');
-                break;
-            }else{
-                alert('Letra correta!');
-            }
-        }
+    if(pathImg.includes(correctButton)){
+
+        failButton = false;
+        toValidPass();
+
     }else{
         attempts--;
         attemptsNum.innerHTML = attempts;
-        if(attempts > 0){
+        failButton = attempts >= 0;
+        if(failButton)
             alert('Botão incorreto! falta +' + attempts + ' tentativa(s).');
-        }else{
-            panelButtons.style.display = 'none';
-        }
+
+        toValidPass();
     }
+}
+
+function toValidPass(){
+        let inputText = document.querySelector('.input-enigm');
+        valueText = inputText.value;
+
+        let i = 0;
+        if(valueText !== '' && valueText.length === 8){
+            for(i = 0; i < arrayResult.length; i++){
+                if(valueText[i] !== arrayChars[arrayResult[i] + 5]){
+                    failPass = true;
+                    if(!failButton) attempts--;
+                    attemptsNum.innerHTML = attempts;
+                    alert('Senha incorreta! falta +' + attempts + ' tentativa(s).');
+                    break;
+                }
+            }
+        }else{
+            failPass = true;
+            if(!failButton) attempts--;
+            alert('Senha incorreta! falta +' + attempts + ' tentativa(s).');
+        }
+
+        
+        if(i === arrayResult.length){
+            if(!failButton) successMission4 = true;
+            failPass = false;
+        }
 }
 
 
@@ -983,6 +1086,7 @@ function runMission(){
                 yourShip.style.height = '200px';
                 yourShip.style.top = '380px';
                 window.addEventListener('keyup', repositionPerson);
+                speedAliens -= 5;
                 break;
         case 4: placar.innerHTML = "<h2> Tentativas: <label id='attempts'>" + attempts + "</label> | "
                         + " | Segundos: <label id='seconds'>" + seconds + "</label> | Missão: <label id='the-mission'>" + missions.mission +"</label></h2>";
@@ -1085,6 +1189,8 @@ function walkToMotherShip(){
         pressJ = false;
         window.removeEventListener('keydown', flyShip);
         window.removeEventListener('keyup', repositionPerson);
+        soundMonstersAtt.pause();
+        soundMonsters.pause();
         musicFinish.pause();
         introMusic.play();     
     }else{
@@ -1125,6 +1231,11 @@ let initMusic = () => {
     musicMission.addEventListener("ended", function(){ 
         musicMission.currentTime = 0; 
         musicMission.play(); 
+    }, false);
+
+    soundAlarmShip.addEventListener("ended", function(){ 
+        soundAlarmShip.currentTime = 0; 
+        soundAlarmShip.play(); 
     }, false);
 
 
