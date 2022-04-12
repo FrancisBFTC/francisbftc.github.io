@@ -580,7 +580,7 @@ function playGame() {
         if(missions.step4.running){
             runLastMission();
         }else{
-            window.addEventListener('keydown', flyShip);
+            document.addEventListener('keydown', flyShip);
             abatidos = document.getElementById('abatidos');
 
              if(missions.step1.running || missions.step2.running){
@@ -661,7 +661,7 @@ function firstMission(){
                     infoStatusGame.style.display = 'block';
 
                     document.getElementById('buttonOk').addEventListener('click', () => {
-                        window.addEventListener('keydown', flyShip);
+                        document.addEventListener('keydown', flyShip);
                         document.getElementById('buttonOk').removeEventListener('click', this);
                         infoStatusGame.innerHTML = '';
                         infoStatusGame.style.display = 'none';
@@ -718,7 +718,7 @@ function secondMission() {
 
 
                    document.getElementById('buttonOk').addEventListener('click', () => {
-                        window.addEventListener('keydown', flyShip);
+                        document.addEventListener('keydown', flyShip);
                         document.getElementById('buttonOk').removeEventListener('click', this);
                         infoStatusGame.innerHTML = '';
                         infoStatusGame.style.display = 'none';
@@ -762,8 +762,8 @@ function thirdMission(){
                         infoStatusGame.innerHTML = '';
                         infoStatusGame.style.display = 'none';
                         pressJ = true;
-                        window.addEventListener('keydown', flyShip);
-                        window.addEventListener('keyup', repositionPerson);
+                        document.addEventListener('keydown', flyShip);
+                        document.addEventListener('keyup', repositionPerson);
                     });
 
         
@@ -1085,7 +1085,7 @@ function runMission(){
                 yourShip.style.width = '200px';
                 yourShip.style.height = '200px';
                 yourShip.style.top = '380px';
-                window.addEventListener('keyup', repositionPerson);
+                document.addEventListener('keyup', repositionPerson);
                 speedAliens = 20;
                 break;
         case 4: placar.innerHTML = "<h2> Tentativas: <label id='attempts'>" + attempts + "</label>"
@@ -1102,7 +1102,7 @@ function runMission(){
  
 // Função para finalizar jogo tanto no gameover quanto nas missões
 function finishGame(){ 
-    window.removeEventListener('keydown', flyShip); 
+    document.removeEventListener('keydown', flyShip); 
     clearInterval(initMission);
     initMission = null;
     clearInterval(alienInterval);
@@ -1112,7 +1112,7 @@ function finishGame(){
     lasers.forEach((laser) => laser.remove());
     playArea.classList.remove(direction[indexDir]);
     if(missions.mission >= 3)
-        window.removeEventListener('keyup', repositionPerson);
+        document.removeEventListener('keyup', repositionPerson);
 }
 
 // Inserir objeto do propósito da missão seria criar um planeta Axius para a missão 1
@@ -1187,8 +1187,8 @@ function walkToMotherShip(){
         playArea.classList.remove('back-animate2');
         playArea.classList.add('back-default');
         pressJ = false;
-        window.removeEventListener('keydown', flyShip);
-        window.removeEventListener('keyup', repositionPerson);
+        document.removeEventListener('keydown', flyShip);
+        document.removeEventListener('keyup', repositionPerson);
         soundMonstersAtt.pause();
         soundMonsters.pause();
         musicFinish.pause();
